@@ -4,6 +4,16 @@ Paste a YouTube or Instagram link, pick a quality, and save the video as MP4 (up
 
 Built by [Pratik Patel](https://github.com/pratik227) · [@PratikPatel_227 on X](https://x.com/PratikPatel_227)
 
+![Clipdrop showing a pasted YouTube link with quality options from 4K down to audio only](docs/screenshot-light.png)
+
+## Screenshots
+
+| Dark theme | Phone |
+| --- | --- |
+| ![Clipdrop in dark theme](docs/screenshot-dark.png) | <img src="docs/screenshot-mobile.png" alt="Clipdrop result card on a phone" width="280"> |
+
+The theme follows your system setting.
+
 ## Run with Docker
 
 ```bash

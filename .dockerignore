@@ -1,0 +1,8 @@
+.venv
+.git
+__pycache__
+*.pyc
+cookies.txt
+.playwright-mcp
+README.md
+docker-compose.yml

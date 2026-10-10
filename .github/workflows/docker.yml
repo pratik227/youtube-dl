@@ -1,0 +1,19 @@
+name: Docker build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t clipdrop .
+      - name: Smoke test
+        run: |
+          docker run -d --name clipdrop -p 5050:5050 clipdrop
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:5050/ >/dev/null && exit 0; sleep 1; done
+          docker logs clipdrop; exit 1

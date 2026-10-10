@@ -1,0 +1,17 @@
+services:
+  clipdrop:
+    build: .
+    image: clipdrop
+    container_name: clipdrop
+    ports:
+      - "5050:5050"
+    restart: unless-stopped
+    # Downloads are staged here before they're sent to the browser.
+    tmpfs:
+      - /tmp:size=4g
+    # To unlock login-gated Instagram posts, export browser cookies to
+    # ./cookies.txt and uncomment:
+    # environment:
+    #   COOKIES_FILE: /app/cookies.txt
+    # volumes:
+    #   - ./cookies.txt:/app/cookies.txt:ro

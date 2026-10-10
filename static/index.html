@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Clipdrop</title>
-<meta name="description" content="Paste a YouTube or Instagram link and save the video as MP4 or the audio as MP3.">
+<meta name="description" content="Paste a YouTube, Instagram or TikTok link and save the video as MP4 or the audio as MP3.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff4d6d'/%3E%3Cpath d='M16 7v13m0 0l-6-6m6 6l6-6M9 25h14' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#ff4d6d">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
@@ -127,6 +130,7 @@ h1 em {
 }
 .platform[data-p="youtube"] { background: #ff3b3b; color: #fff; }
 .platform[data-p="instagram"] { background: linear-gradient(45deg, #ffb13d, #ff3d77 55%, #b23dff); color: #fff; }
+.platform[data-p="tiktok"] { background: #0b0b0f; color: #fff; box-shadow: inset 2px 0 0 #25f4ee, inset -2px 0 0 #fe2c55; }
 .slot input {
   flex: 1; min-width: 0; height: 48px; border: 0; background: transparent; outline: none;
   font: 500 16px/1 var(--mono); letter-spacing: -.01em;
@@ -233,7 +237,7 @@ h3.h { margin: 0 0 22px; font: 700 clamp(26px, 4vw, 34px)/1.1 var(--display); le
 .steps strong { font: 700 19px/1.2 var(--display); }
 .steps span { color: var(--ink-soft); font-size: 15px; }
 
-.links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .links > div { background: var(--sunken); border-radius: var(--r-md); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .links h4 { margin: 0; font: 700 18px/1 var(--display); }
 .links ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
@@ -320,7 +324,7 @@ footer p { margin: 0; max-width: 70ch; }
   <main>
     <div class="hero">
       <h1>Paste a link. <em>Keep</em> the video.</h1>
-      <p class="lede">Works with YouTube videos and Shorts, and Instagram reels and posts. Pick a quality, and the file lands in your downloads folder.</p>
+      <p class="lede">Works with YouTube videos and Shorts, Instagram reels and posts, and TikTok videos. Pick a quality, and the file lands in your downloads folder.</p>
 
       <form class="slot" id="form" novalidate>
         <span class="platform" id="platform" aria-hidden="true"></span>
@@ -340,7 +344,7 @@ footer p { margin: 0; max-width: 70ch; }
     <section class="block">
       <h3 class="h">Three steps, about ten seconds</h3>
       <ol class="steps">
-        <li><strong>Copy the link</strong><span>Use Share → Copy link in the YouTube or Instagram app, or copy it from your browser's address bar.</span></li>
+        <li><strong>Copy the link</strong><span>Use Share → Copy link in the YouTube, Instagram or TikTok app, or copy it from your browser's address bar.</span></li>
         <li><strong>Paste it above</strong><span>Clipdrop reads the title, length and every quality the video is available in.</span></li>
         <li><strong>Choose and save</strong><span>Pick a resolution for MP4, or Audio for an MP3. The download starts when it's ready.</span></li>
       </ol>
@@ -367,6 +371,15 @@ footer p { margin: 0; max-width: 70ch; }
             <li>Public posts only, unless you add cookies</li>
           </ul>
         </div>
+        <div>
+          <h4>TikTok</h4>
+          <ul>
+            <li>tiktok.com/<b>@user/video/</b>…</li>
+            <li>vm.tiktok.com/…</li>
+            <li>vt.tiktok.com/…</li>
+            <li>Public videos only</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -380,6 +393,10 @@ footer p { margin: 0; max-width: 70ch; }
         <details>
           <summary>An Instagram link says it needs a logged-in session. What now?</summary>
           <p>Instagram hides many posts from logged-out visitors. Export your browser cookies to a file named <code>cookies.txt</code>, put it next to <code>app.py</code>, and restart the server.</p>
+        </details>
+        <details>
+          <summary>Can I send a video here from the Share menu?</summary>
+          <p>On Android, yes. Open this site in Chrome, choose <code>Add to Home screen</code> and install it. Clipdrop then appears in the Share menu of YouTube, Instagram and TikTok. iPhones don't let websites join the Share menu, so copy and paste the link there.</p>
         </details>
         <details>
           <summary>Where do the files go?</summary>
@@ -413,10 +430,12 @@ footer p { margin: 0; max-width: 70ch; }
   const $ = (id) => document.getElementById(id);
   const form = $("form"), input = $("url"), go = $("go"), msg = $("msg"), tray = $("tray"), badge = $("platform");
   const SAMPLE = "https://www.youtube.com/watch?v=jNQXAC9IVRw";
+  const NAMES = { youtube: "YouTube", instagram: "Instagram", tiktok: "TikTok" };
 
   const ICONS = {
     none: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>',
     youtube: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    tiktok: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4v11.5a3.5 3.5 0 11-3.5-3.5"/><path d="M13 4c.4 2.6 2.2 4.4 5 4.8"/></svg>',
     instagram: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".6" fill="currentColor"/></svg>',
   };
 
@@ -429,13 +448,14 @@ footer p { margin: 0; max-width: 70ch; }
       const is = (d) => host === d || host.endsWith("." + d);
       if (is("youtube.com") || is("youtu.be") || is("youtube-nocookie.com")) return "youtube";
       if (is("instagram.com") || is("instagr.am")) return "instagram";
+      if (is("tiktok.com")) return "tiktok";
     } catch (e) { /* not a URL yet */ }
     return "unknown";
   }
 
   function paintBadge() {
     const p = platformOf(input.value);
-    const known = p === "youtube" || p === "instagram";
+    const known = p in NAMES;
     badge.dataset.p = known ? p : "";
     badge.innerHTML = ICONS[known ? p : "none"];
   }
@@ -494,7 +514,7 @@ footer p { margin: 0; max-width: 70ch; }
     const value = input.value.trim();
     const p = platformOf(value);
     if (!value) { showError("Paste a link first."); input.focus(); return; }
-    if (p === "unknown") { showError("Only YouTube and Instagram links are supported."); return; }
+    if (p === "unknown") { showError("Only YouTube, Instagram and TikTok links are supported."); return; }
     showError("");
     const mine = ++lookup;
     go.disabled = true; go.textContent = "Looking…";
@@ -519,7 +539,7 @@ footer p { margin: 0; max-width: 70ch; }
     if (info.duration) thumb.append(el("span", { class: "time", text: fmtTime(info.duration) }));
 
     const by = [info.author, info.views ? fmtCount(info.views) + " views" : "",
-      info.platform === "youtube" ? "YouTube" : "Instagram"].filter(Boolean).join(" · ");
+      NAMES[info.platform]].filter(Boolean).join(" · ");
     const left = el("div", {},
       el("div", { class: "film" }, thumb),
       el("div", { class: "meta" }, el("h2", { text: info.title }), el("p", { class: "byline", text: by })));
@@ -609,7 +629,7 @@ footer p { margin: 0; max-width: 70ch; }
   input.addEventListener("paste", () => setTimeout(() => {
     paintBadge();
     const p = platformOf(input.value);
-    if (p === "youtube" || p === "instagram") fetchInfo();
+    if (p in NAMES) fetchInfo();
   }, 0));
   $("paste").addEventListener("click", async () => {
     try {
@@ -622,6 +642,23 @@ footer p { margin: 0; max-width: 70ch; }
     }
   });
   $("sample").addEventListener("click", () => { input.value = SAMPLE; paintBadge(); fetchInfo(); });
+
+  // Links arrive here from the phone's share menu (installed app) or a ?url= deep link.
+  // Apps put the link in "url" or bury it in "text", so check every field.
+  function sharedLink() {
+    const params = new URLSearchParams(location.search);
+    for (const key of ["url", "text", "title"]) {
+      const found = (params.get(key) || "").match(/https?:\/\/\S+/g) || [];
+      const link = found.find((u) => platformOf(u) in NAMES);
+      if (link) return link;
+    }
+    return "";
+  }
+  const shared = sharedLink();
+  if (location.search) history.replaceState(null, "", location.pathname);
+  if (shared) { input.value = shared; fetchInfo(); }
+
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   paintBadge();
 })();
 </script>

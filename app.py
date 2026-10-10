@@ -1,4 +1,4 @@
-"""Clipdrop — paste a YouTube or Instagram link, pick a quality, download it."""
+"""Clipdrop — paste a YouTube, Instagram or TikTok link, pick a quality, download it."""
 
 import os
 import re
@@ -28,6 +28,7 @@ ALLOWED_HOSTS = {
     "youtube-nocookie.com": "youtube",
     "instagram.com": "instagram",
     "instagr.am": "instagram",
+    "tiktok.com": "tiktok",
 }
 HEIGHTS = [2160, 1440, 1080, 720, 480, 360, 240, 144]
 MAX_ACTIVE_JOBS = 4
@@ -50,7 +51,7 @@ class UserError(Exception):
 
 
 def detect_platform(url):
-    """Return 'youtube' / 'instagram' for a supported link, else raise."""
+    """Return the platform name for a supported link, else raise."""
     if not isinstance(url, str) or len(url) > 2048:
         raise UserError("That doesn't look like a valid link.")
     url = url.strip()
@@ -61,7 +62,7 @@ def detect_platform(url):
     for domain, platform in ALLOWED_HOSTS.items():
         if host == domain or host.endswith("." + domain):
             return url, platform
-    raise UserError("Only YouTube and Instagram links are supported.")
+    raise UserError("Only YouTube, Instagram and TikTok links are supported.")
 
 
 def base_opts():
@@ -90,6 +91,8 @@ def friendly_error(exc):
             "This one needs a logged-in session. Add a cookies.txt file next to "
             "app.py and try again."
         )
+    if "timed out" in low or "connection" in low or "getaddrinfo" in low:
+        return "Couldn't reach that site from this network. It may be blocked here."
     if "unavailable" in low or "not available" in low or "removed" in low:
         return "This content is unavailable or has been removed."
     if "unsupported url" in low or "no video" in low:
@@ -254,6 +257,22 @@ def index():
     return send_from_directory(BASE_DIR / "static", "index.html")
 
 
+@app.get("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(BASE_DIR / "static", "manifest.webmanifest",
+                               mimetype="application/manifest+json")
+
+
+@app.get("/sw.js")
+def service_worker():
+    return send_from_directory(BASE_DIR / "static", "sw.js", mimetype="text/javascript")
+
+
+@app.get("/icons/<path:name>")
+def icons(name):
+    return send_from_directory(BASE_DIR / "static" / "icons", name)
+
+
 @app.post("/api/info")
 def api_info():
     body = request.get_json(silent=True) or {}
@@ -276,7 +295,8 @@ def api_info():
     if platform == "instagram":
         # Instagram "titles" are generic; the caption's first line reads better.
         caption = (info.get("description") or "").strip().splitlines()
-        title = (caption[0] if caption else title)[:140] or title
+        title = (caption[0] if caption else title) or title
+    title = title[:140]
     token = uuid.uuid4().hex
     with lock:
         infos[token] = {

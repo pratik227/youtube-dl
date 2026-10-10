@@ -1,6 +1,6 @@
 # Clipdrop
 
-Paste a YouTube or Instagram link, pick a quality, and save the video as MP4 (up to 4K) or the audio as MP3.
+Paste a YouTube, Instagram or TikTok link, pick a quality, and save the video as MP4 (up to 4K) or the audio as MP3.
 
 Built by [Pratik Patel](https://github.com/pratik227) · [@PratikPatel_227 on X](https://x.com/PratikPatel_227)
 
@@ -13,6 +13,14 @@ Built by [Pratik Patel](https://github.com/pratik227) · [@PratikPatel_227 on X]
 | ![Clipdrop in dark theme](docs/screenshot-dark.png) | <img src="docs/screenshot-mobile.png" alt="Clipdrop result card on a phone" width="280"> |
 
 The theme follows your system setting.
+
+## Share menu on Android
+
+Clipdrop is an installable web app. Open it in Chrome on Android, choose **Add to Home screen**, and it appears in the Share menu of YouTube, Instagram and TikTok, so you can send a video straight to it instead of copying the link.
+
+- The site must be served over HTTPS for Chrome to offer the install, so this needs a deployed copy or a tunnel, not `http://localhost` on another device.
+- iOS does not let websites join the Share menu. Copy and paste the link there.
+- Any link can also be passed directly: `https://your-host/?url=<video link>`.
 
 ## Run with Docker
 
@@ -57,6 +65,7 @@ Any host that runs a container works: Render, Railway, Fly.io, or a VPS. Point i
 
 - Keep it to **one instance**. Download jobs and progress are held in memory.
 - YouTube often blocks data-centre IP addresses, so downloads that work at home can fail in the cloud.
+- TikTok is unreachable in countries where it is banned. The server has to run somewhere that can reach it.
 - There is no rate limiting or login. Add them before sharing a public URL.
 - If downloads start failing, rebuild to pick up the newest yt-dlp: `docker compose build --no-cache`.
 
